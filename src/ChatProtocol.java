@@ -72,10 +72,85 @@ public class ChatProtocol {
 			enterroom(); // 입장시 본인이 들어온 만큼 데이터베이스를 바꾸고 그방에 있는 모든 사람들에게 room_update를 시킨다. 
 		} else if (fromClient == Command.EXITROOM) {
 			exitroom(); // 퇴장시 본인이 들어온 만큼 데이터베이스를 바꾸고 그방에 있는 모든 사람들에게 room_update를 시킨다.
+		} else if (fromClient == Command.RESETROOM) {
+			resetroom();
+		} else if (fromClient == Command.GETSELETEDROOM) {
+			getselectedroom();
 		}
 		
 	}
 	
+	private void getselectedroom() {
+		Connection conn = null;
+		Statement stmt = null;
+		ResultSet rs = null;
+		try {
+			int roomnumber = dis.readInt();
+			conn = dao_room.getConn();
+			stmt = conn.createStatement();
+			String sql = "SELECT roomname, maximum, currentnum from room where roomnumber = " + roomnumber;
+			rs = stmt.executeQuery(sql);
+			String roomname = null;
+			int max = 0;
+			int num = 0;
+			
+			while (rs.next()) {
+				roomname = rs.getString("roomname");
+				max = rs.getInt("maximum");
+				num = rs.getInt("currentnum");
+			}
+			dos.writeUTF(roomname);
+			dos.writeInt(max);
+			dos.writeInt(num);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			try {
+				rs.close();
+				stmt.close();
+				conn.close();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	private void resetroom() {
+		Connection conn = null;
+		Statement stmt = null;
+		ResultSet rs = null;
+		try {
+			conn = dao_client.getConn();
+			stmt = conn.createStatement();
+			String sql = "SELECT COUNT(*) FROM ROOM;";
+			rs = stmt.executeQuery(sql);
+			int roomnum = 0;
+			while (rs.next()) {
+				roomnum = rs.getInt(1);
+			}
+			dos.writeInt(roomnum);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			try {
+				rs.close();
+				stmt.close();
+				conn.close();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
 	
 	
 	private void chatroom_update() {
@@ -657,9 +732,10 @@ public class ChatProtocol {
 			String pw = dis.readUTF();
 			conn = dao_client.getConn();
 			String sql = "SELECT COUNT(*) FROM CLIENT WHERE id = ? AND pw = ?;";
-			pstmt = conn.prepareStatement(sql);
+			pstmt = conn.prepareStatement(sql); //statement
 			pstmt.setString(1, id);
 			pstmt.setString(2, pw);
+			 
 			rs = pstmt.executeQuery();
 			int x = 0;
 			while (rs.next()) {

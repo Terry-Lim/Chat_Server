@@ -21,12 +21,13 @@ public class Server {
 	public static void main(String[] args) {
 		RoomManager rm = new RoomManager();
 		try (ServerSocket server = new ServerSocket(PORT);) {
-			while (true) {
+			while (true) {	
 				System.out.println("접속 시도");
 				Socket client = server.accept();
 				dis = new DataInputStream(
 						client.getInputStream());
 				dos = new DataOutputStream(client.getOutputStream());
+				
 				Thread t1 = new Thread(new Runnable() {
 					
 					@Override
