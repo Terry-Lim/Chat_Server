@@ -8,7 +8,7 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.sql.Connection;
-
+// 깃허브 두번쨰 수정
 public class Server {
 	
 	private static final int PORT = 4900;
