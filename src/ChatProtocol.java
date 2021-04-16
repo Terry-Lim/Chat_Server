@@ -76,6 +76,56 @@ public class ChatProtocol {
 			resetroom();
 		} else if (fromClient == Command.GETSELETEDROOM) {
 			getselectedroom();
+		} else if  (fromClient == Command.PROFILEVIEW) {
+			getprofile();
+		}
+		
+	}
+	
+	private void getprofile() {
+		Connection conn = null;
+		Statement stmt = null;
+		ResultSet rs = null;
+		
+		try {
+			String getid = dis.readUTF();
+			conn = dao_client.getConn();
+			stmt = conn.createStatement();
+			String sql = "SELECT id, name, tell, birthdate, status FROM client WHERE id =" + getid;
+			rs = stmt.executeQuery(sql);
+			String id = null;
+			String name = null;
+			String tell = null;
+			String birthdate = null;
+			String status = null;
+			
+			
+			id = rs.getString("id");
+			name = rs.getString("name");
+			tell = rs.getString("tell");
+			birthdate = rs.getString("birthdate");
+			status = rs.getString("status");
+			
+			dos.writeUTF(id);
+			dos.writeUTF(name);
+			dos.writeUTF(tell);
+			dos.writeUTF(birthdate);
+			dos.writeUTF(status);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			try {
+				rs.close();
+				stmt.close();
+				conn.close();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		
 	}
