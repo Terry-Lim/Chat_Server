@@ -78,8 +78,27 @@ public class ChatProtocol {
 			getselectedroom();
 		} else if  (fromClient == Command.PROFILEVIEW) {
 			getprofile();
+		} else if (fromClient == Command.FINDROOM) {
+			findroom();
 		}
 		
+	}
+	
+	private void findroom() {
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		
+		try {
+			conn = dao_room.getConn();
+			String name = dis.readUTF();
+			String sql = "SELECT";
+//			pstmt = conn.prepareStatement(sql);
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	private void getprofile() {
@@ -253,16 +272,16 @@ public class ChatProtocol {
 		Connection conn = null;
 		ResultSet rs = null;
 		try {
-			int roomnumber = dis.readInt();
+			String roomname = dis.readUTF();
 			String id = dis.readUTF();
-			rm.addRoom_member(roomnumber, id);
+			rm.addRoom_member(roomname, id);
 			
-			int currentNum = rm.getRoomNum(roomnumber);
+			int currentNum = rm.getRoomNum(roomname);
 			conn = dao_room.getConn();
-			String sql = "UPDATE room SET currentnum = ? WHERE roomnumber = ?;";
+			String sql = "UPDATE room SET currentnum = ? WHERE roomname = ?;";
 			pstmt = conn.prepareStatement(sql);
 			pstmt.setInt(1, currentNum);
-			pstmt.setInt(2,roomnumber);
+			pstmt.setString(2,roomname);
 			pstmt.executeUpdate();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -288,16 +307,16 @@ public class ChatProtocol {
 		Connection conn = null;
 		ResultSet rs = null;
 		try {
-			int roomnumber = dis.readInt();
+			String roomname = dis.readUTF();
 			String id = dis.readUTF();
-			rm.removeRoom_member(roomnumber, id);
+			rm.removeRoom_member(roomname, id);
 			
-			int currentNum = rm.getRoomNum(roomnumber);
+			int currentNum = rm.getRoomNum(roomname);
 			conn = dao_room.getConn();
-			String sql = "UPDATE room SET currentnum = ? WHERE roomnumber = ?;";
+			String sql = "UPDATE room SET currentnum = ? WHERE roomname = ?;";
 			pstmt = conn.prepareStatement(sql);
 			pstmt.setInt(1, currentNum);
-			pstmt.setInt(2,roomnumber);
+			pstmt.setString(2,roomname);
 			pstmt.executeUpdate();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
