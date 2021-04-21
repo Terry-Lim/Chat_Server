@@ -17,7 +17,7 @@ public class Command {
 	
 	public static final int RESETROOM = 2000;
 	public static final int GETSELETEDROOM = 2004;
-	public static final int SHOWBOOKMARK = 2001;
+	public static final int GETBOOKMARK = 2001;
 	public static final int FINDROOM = 2002;
 	public static final int MAKEROOM = 2100;
 	public static final int ENTERROOM = 2003;

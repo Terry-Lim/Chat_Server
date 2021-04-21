@@ -88,9 +88,53 @@ public class ChatProtocol {
 			makeroom();
 		} else if (fromClient == Command.PARTICIPANTSUPDATE) {
 			participantsupdate();
+		} else if (fromClient == Command.GETBOOKMARK) {
+			getbookmark();
 		}
 		
 	}
+	
+	public void getbookmark() {
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		Statement stmt = null;
+		ResultSet rs = null;
+		try {
+			String id = dis.readUTF();
+			String bookmark = null;
+			String sql = "SELECT bookmark FROM client WHERE id = ?";
+			conn = dao_client.getConn();
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, id);
+			rs = pstmt.executeQuery();
+			
+			while (rs.next()) {
+				bookmark = rs.getString(1); //123768
+			}
+			int roomnum = bookmark.length();
+			int [] room = new int [roomnum];
+			int x = Integer.parseInt(bookmark);
+			int z = 0;
+			while (x > 0) {
+				int y = x % 10;
+				x = x / 10;
+				room[z] = y;
+				z++;
+			}
+			dos.writeInt(roomnum);
+			
+			for (int i = 0; i < roomnum; i++) {
+				dos.writeInt(room[i]);
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+	}
+	
 	
 	public void participantsupdate() {
 		try {
