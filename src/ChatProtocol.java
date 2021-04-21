@@ -78,6 +78,7 @@ public class ChatProtocol {
 			getselectedroom();
 		} else if  (fromClient == Command.PROFILEVIEW) {
 			getprofile();
+			
 		}
 		
 	}
@@ -88,29 +89,30 @@ public class ChatProtocol {
 		ResultSet rs = null;
 		
 		try {
-			String getid = dis.readUTF();
+			String getid = dis.readUTF(); 
 			conn = dao_client.getConn();
 			stmt = conn.createStatement();
-			String sql = "SELECT id, name, tell, birthdate, status FROM client WHERE id =" + getid;
+			String sql = "SELECT name, tell, birthdate, status, icon FROM client WHERE id = '" + getid + "';";
 			rs = stmt.executeQuery(sql);
-			String id = null;
 			String name = null;
 			String tell = null;
 			String birthdate = null;
 			String status = null;
+			String icon = null;
 			
-			
-			id = rs.getString("id");
-			name = rs.getString("name");
-			tell = rs.getString("tell");
-			birthdate = rs.getString("birthdate");
-			status = rs.getString("status");
-			
-			dos.writeUTF(id);
-			dos.writeUTF(name);
-			dos.writeUTF(tell);
-			dos.writeUTF(birthdate);
+			while (rs.next()) {
+				name = rs.getString("name"); 
+				tell = rs.getString("tell");
+				birthdate = rs.getString("birthdate");
+				status = rs.getString("status");
+				icon = rs.getString("icon");
+			}
+		
+			dos.writeUTF(name); 
+			dos.writeUTF(tell); 
+			dos.writeUTF(birthdate); 
 			dos.writeUTF(status);
+			dos.writeUTF(icon);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -230,6 +232,7 @@ public class ChatProtocol {
 			dos.writeUTF(leader);
 			dos.writeInt(num);
 			dos.writeInt(maxnum);
+			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -255,7 +258,8 @@ public class ChatProtocol {
 		try {
 			int roomnumber = dis.readInt();
 			String id = dis.readUTF();
-			rm.addRoom_member(roomnumber, id);
+			rm.addRoom_member(roomnumber, id, dos);
+			
 			
 			int currentNum = rm.getRoomNum(roomnumber);
 			conn = dao_room.getConn();
@@ -264,6 +268,7 @@ public class ChatProtocol {
 			pstmt.setInt(1, currentNum);
 			pstmt.setInt(2,roomnumber);
 			pstmt.executeUpdate();
+			System.out.println("아이디" + rm.getRoomMember(roomnumber));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

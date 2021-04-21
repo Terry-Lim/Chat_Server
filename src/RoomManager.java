@@ -1,39 +1,25 @@
+import java.io.DataOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
- // ¹æ°ú ¹æÀ» Æ÷ÇÔÇÏ´Â »ç¶÷µéÀ» ÀúÀåÇØ¾ßµÈ´Ù.
- // hashmap map<key(¹æ³Ñ¹ö), value(»ç¶÷µé)>
+ // ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ø¾ßµÈ´ï¿½.
+ // hashmap map<key(ï¿½ï¿½Ñ¹ï¿½), value(ï¿½ï¿½ï¿½ï¿½ï¿½)>
+
 
 public class RoomManager {
-	private HashMap<Integer, List> room = new HashMap<>();
-	private List <String> room_member = new ArrayList<>();
+	private HashMap<Integer, List <User>> room = new HashMap<>();
+	private List <User> room_member = new ArrayList<>();
 	
-	public void updateRoom() {
-		
-	}
-	
-	public HashMap<Integer, List> getRoom() {
-		return room;
+	public String getRoomMember (int roomnumber) {
+		return room.get(roomnumber).get(0).getId();
 	}
 
-	public void setRoom(HashMap<Integer, List> room) {
-		this.room = room;
-	}
-
-	public List getRoom_member() {
-		return room_member;
-	}
-
-	public void setRoom_member(List room_member) {
-		this.room_member = room_member;
-	}
-
-	
-	public void addRoom_member(int key, String id) {
+	public void addRoom_member(int key, String id, DataOutputStream dos) {
 //		room.get(key).add(id);
-		room_member.add(id);
+		room_member.add(new User(id, dos));
 		room.put(key, room_member);
+		
 	}
 	public void removeRoom_member(int key, String id) {
 		room_member.remove(id);
@@ -41,193 +27,43 @@ public class RoomManager {
 	public int getRoomNum(int key) {
 		return room.get(key).size();
 	}
-	
+
+	public String getDos(int roomNumber, String id) {
+		return getUser(id, room.get(roomNumber)).getId();
+		
+	}
+	public User getUser(String id, List<User> room_m) {
+		for (int i =0; i < room_m.size(); i++) {
+			if (room_m.get(i).getId().equals(id)) {
+				return room_m.get(i);
+			}
+		}
+		return null;
+	}
+	public void getuserid(int roomnum, int num) {
+		room.get(roomnum).get(num).getId();
+	}
 }
 
 
+class User {
+	private String id;
+	private DataOutputStream dos;
+	private boolean isLeader;
+	private int warring;
+	public User(String id, DataOutputStream dos) {
+		super();
+		this.id = id;
+		this.dos = dos;
+	}
+	public String getId() {
+		return id;
+	}
+	public DataOutputStream getDos() {
+		return dos;
+	}
+	public void setId(String id) {
+		this.id = id;
+	}
 
-
-
-
-//public class RoomManager {
-//    private static List roomList; // ¹æÀÇ ¸®½ºÆ®
-//    private static AtomicInteger atomicInteger;
-//    
-//    static {
-//        roomList = new ArrayList();
-//        atomicInteger = new AtomicInteger();
-//    }
-//
-//    public RoomManager() {
-//
-//    }
-//    public static TalkRoom createRoom() { // ·ëÀ» »õ·Î »ý¼º(ºó ¹æ)
-//        TalkRoom room = new TalkRoom(roomId);
-//        roomList.add(room);
-//        System.out.println("Room Created!");
-//        return room;
-//    }
-//
-//    /**
-//     * ¹æÀ» »ý¼ºÇÔ°ú µ¿½Ã¿¡ ¹æÀåÀ» ¸¸µé¾îÁÜ
-//     * @param owner ¹æÀå
-//     * @return GameRoom
-//     */
-//    public static TalkRoom createRoom(TalkRoom owner) { // À¯Àú°¡ ¹æÀ» »ý¼ºÇÒ ¶§ »ç¿ë(À¯Àú°¡ ¹æÀåÀ¸·Î µé¾î°¨)
-//
-//        TalkRoom room = new TalkRoom();
-//        room.enterUser(owner);
-//        room.setOwner(owner);
-//
-//        roomList.add(room);
-//        System.out.println("Room Created!");
-//        return room;
-//    }
-//
-//    /**
-//     * Àü´Þ¹ÞÀº ·ëÀ» Á¦°Å
-//     * @param room Á¦°ÅÇÒ ·ë
-//     */
-//    public static void removeRoom(TalkRoom room) {
-//        room.close();
-//        roomList.remove(room); // Àü´Þ¹ÞÀº ·ëÀ» Á¦°ÅÇÑ´Ù.
-//        System.out.println("Room Deleted!");
-//    }
-//
-//    /**
-//     * ¹æÀÇ ÇöÀç Å©±â¸¦ ¸®ÅÏ
-//     * @return ÇöÀç size
-//     */
-//    public static int roomCount() {
-//        return roomList.size();
-//    }
-//}
-//
-//
-//import java.util.ArrayList;
-//import java.util.List;
-//
-//public class TalkRoom {
-//
-//    private List userList;
-//    private User roomOwner; // ¹æÀå
-//    private String roomName; // ¹æ ÀÌ¸§
-//
-//
-//    public TalkRoom(int roomSize, User user) { // ¹æ¸¸µé±â
-//        userList = new ArrayList(roomSize);
-//        user.enterRoom(this);
-//        userList.add(user); // À¯Àú¸¦ Ãß°¡½ÃÅ² ÈÄ
-//        this.roomOwner = user; // ¹æÀåÀ» À¯Àú·Î ¸¸µç´Ù.
-//        this.roomName = null;
-//    }
-//    
-//    public TalkRoom(int roomSize, String roomTitle, User user) {
-//    	userList = new ArrayList(roomSize);
-//    	user.enterRoom(this);
-//        userList.add(user); // À¯Àú¸¦ Ãß°¡½ÃÅ² ÈÄ
-//        this.roomOwner = user; // ¹æÀåÀ» À¯Àú·Î ¸¸µç´Ù.
-//        this.roomName = roomTitle;
-//    	
-//    }
-//
-//    public void enterUser(User user) {
-//        user.enterRoom(this);
-//        userList.add(user);
-//    }
-//
-//    // °­Åð
-//    public void exitUser(User user) {
-//        user.exitRoom(this);
-//        userList.remove(user); // ÇØ´ç À¯Àú¸¦ ¹æ¿¡¼­ ³»º¸³¿
-//    }
-//    
-//    // ¹æÀå ±ÇÇÑ ¾çµµ
-//    public void setOwner(User user) {
-//        this.roomOwner = user; // Æ¯Á¤ »ç¿ëÀÚ¸¦ ¹æÀåÀ¸·Î º¯°æÇÑ´Ù.
-//    }
-//    
-//    public void close() {
-//		if (userList.size() <= 1) { // ¸ðµç ÀÎ¿øÀÌ ´Ù ¹æÀ» ³ª°¬´Ù¸é
-//			RoomManager.removeRoom(this); // ÀÌ ¹æÀ» Á¦°ÅÇÑ´Ù.
-//	        return;
-//	    }
-//	}
-//    // ÀÎ¿ø¼öº¯°æ
-//    public void changePeople(int num, List list) {
-//    	for (int i = 0; i >= list.size(); i++) {
-//    		userList = new ArrayList<>(num);
-//    		userList.add(list.get(i));
-//    	}
-//    	
-//    }
-//
-//    public void setRoomName(String name) { // ¹æ ÀÌ¸§À» ¼³Á¤
-//        this.roomName = name;
-//    }
-//
-//    public String getRoomName() { // ¹æ ÀÌ¸§À» °¡Á®¿È
-//        return roomName;
-//    }
-//
-//    public int getUserSize() { // À¯ÀúÀÇ ¼ö¸¦ ¸®ÅÏ
-//        return userList.size();
-//    }
-//
-//    public User getOwner() { // ¹æÀåÀ» ¸®ÅÏ
-//        return roomOwner;
-//    }
-//
-//    public List getUserList() {
-//        return userList;
-//    }
-//
-//    public void setUserList(List userList) {
-//        this.userList = userList;
-//    }
-//
-//    public User getRoomOwner() {
-//        return roomOwner;
-//    }
-//
-//    public void setRoomOwner(User roomOwner) {
-//        this.roomOwner = roomOwner;
-//    }
-//
-//    
-//	@Override
-//	public int hashCode() {
-//		final int prime = 31;
-//		int result = 1;
-//		result = prime * result + ((roomName == null) ? 0 : roomName.hashCode());
-//		result = prime * result + ((roomOwner == null) ? 0 : roomOwner.hashCode());
-//		result = prime * result + ((userList == null) ? 0 : userList.hashCode());
-//		return result;
-//	}
-//	@Override
-//	public boolean equals(Object obj) {
-//		if (this == obj)
-//			return true;
-//		if (obj == null)
-//			return false;
-//		if (getClass() != obj.getClass())
-//			return false;
-//		TalkRoom other = (TalkRoom) obj;
-//		if (roomName == null) {
-//			if (other.roomName != null)
-//				return false;
-//		} else if (!roomName.equals(other.roomName))
-//			return false;
-//		if (roomOwner == null) {
-//			if (other.roomOwner != null)
-//				return false;
-//		} else if (!roomOwner.equals(other.roomOwner))
-//			return false;
-//		if (userList == null) {
-//			if (other.userList != null)
-//				return false;
-//		} else if (!userList.equals(other.userList))
-//			return false;
-//		return true;
-//	}
-//}
+}
