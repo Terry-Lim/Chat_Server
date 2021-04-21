@@ -1,8 +1,10 @@
+import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -19,14 +21,16 @@ public class ChatProtocol {
 	DAO_Client dao_client ;
 	DAO_Room dao_room;
 	RoomManager rm = new RoomManager();
+	PrintWriter pw;
+	BufferedReader br;
 	ChatProtocol(DataOutputStream dos, DataInputStream dis, 
-			ObjectOutputStream oos, ObjectInputStream ois,
+			PrintWriter pw, BufferedReader br,
 			RoomManager rm) 
 	{
 		this.dos = dos;
 		this.dis = dis;
-		this.oos = oos;
-		this.ois = ois;
+		this.pw = pw;
+		this.br = br;
 		this.rm = rm;
 		dao_client = new DAO_Client();
 		dao_room = new DAO_Room();
@@ -78,9 +82,95 @@ public class ChatProtocol {
 			getselectedroom();
 		} else if  (fromClient == Command.PROFILEVIEW) {
 			getprofile();
+<<<<<<< HEAD
 			
+=======
+		} else if (fromClient == Command.FINDROOM) {
+			findroom();
+		} else if (fromClient == Command.MAKEROOM) {
+			makeroom();
+>>>>>>> c9e2670bcf86b53212c9ea155dd2b98c35e21cca
 		}
 		
+	}
+	
+	private void makeroom() {
+		Connection conn = null;
+		Statement stmt = null;
+		ResultSet rs = null;
+		try {
+			String id = dis.readUTF();
+			String roomname = dis.readUTF();
+			int num = dis.readInt();
+			rm.makeRoom(roomname, id, pw);
+			conn = dao_room.getConn();
+			stmt = conn.createStatement();
+			String sql1 = "SELECT COUNT(*) FROM room where roomname = '" + roomname + "';";
+			rs = stmt.executeQuery(sql1);
+			int isOk = 0;
+			while (rs.next()) {
+				isOk = rs.getInt(1);
+			}
+			if (isOk == 0) {
+				dos.writeInt(0);
+				String sql2 = "INSERT INTO room (roomname, maximum, currentnum) value ('"+ roomname+"', "+ num +", " + 1 +");";
+				stmt.executeUpdate(sql2);
+			} else {
+				dos.writeInt(1);
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	private void findroom() {
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		
+		try {
+			conn = dao_room.getConn();
+			String name = dis.readUTF();
+			String sql1 = "SELECT COUNT(*) from room where roomname = '" + name +"';";
+			pstmt = conn.prepareStatement(sql1);
+			rs = pstmt.executeQuery();
+			int count = 0;
+			
+			while (rs.next()) {
+				count = rs.getInt(1);
+			}
+			if (count > 0 ) {
+				 dos.writeInt(1);
+				 String sql2 = "SELECT roomname, maximum, currentnum from room where roomname = '" + name +"';";
+					pstmt = conn.prepareStatement(sql2);
+					rs = pstmt.executeQuery();
+					String roomname =null;
+					int max = 0;
+					int num = 0;
+					
+					while (rs.next()) {
+						roomname = rs.getString("roomname");
+						max = rs.getInt("maximum");
+						num = rs.getInt("currentnum");
+					}
+					dos.writeUTF(roomname);
+					dos.writeInt(max);
+					dos.writeInt(num);
+			} else {
+				dos.writeInt(0);
+			}
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	private void getprofile() {
@@ -211,25 +301,22 @@ public class ChatProtocol {
 		ResultSet rs = null;
 		
 		try {
-			int roomNumber = dis.readInt();
+			String roomname = dis.readUTF();
 			conn = dao_room.getConn();
-			String sql = "SELECT roomname, maximum, currentnum, leader FROM room WHERE roomnumber = ?;";
+			String sql = "SELECT  maximum, currentnum FROM room WHERE roomname = ?;";
 			
 			pstmt = conn.prepareStatement(sql);
-			pstmt.setInt(1, roomNumber);
+			pstmt.setString(1, roomname);
 			rs = pstmt.executeQuery();
-			String roomname = null;
-			String leader = null;
+			
 			int num = 0;
 			int maxnum = 0;
 			while (rs.next()) { // 방이름 방장이름  참여자 인원수 최대인원수
-				roomname = rs.getString("roomname");
-				leader = rs.getString("leader");
+			
 				num = rs.getInt("currentnum");
 				maxnum = rs.getInt("maximum");
 			}
-			dos.writeUTF(roomname);
-			dos.writeUTF(leader);
+			dos.writeUTF(rm.getLeader(roomname));
 			dos.writeInt(num);
 			dos.writeInt(maxnum);
 			
@@ -241,8 +328,12 @@ public class ChatProtocol {
 			e.printStackTrace();
 		} finally {
 			try {
-				rs.close();
-				pstmt.close();
+				if (rs != null) {
+					rs.close();
+				}
+				if (pstmt != null) {
+					pstmt.close();
+				}
 				conn.close();
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
@@ -256,17 +347,21 @@ public class ChatProtocol {
 		Connection conn = null;
 		ResultSet rs = null;
 		try {
-			int roomnumber = dis.readInt();
+			String roomname = dis.readUTF();
 			String id = dis.readUTF();
+<<<<<<< HEAD
 			rm.addRoom_member(roomnumber, id, dos);
 			
+=======
+			rm.addRoom_member(roomname, id, pw);
+>>>>>>> c9e2670bcf86b53212c9ea155dd2b98c35e21cca
 			
-			int currentNum = rm.getRoomNum(roomnumber);
+			int currentNum = rm.getRoomNum(roomname);
 			conn = dao_room.getConn();
-			String sql = "UPDATE room SET currentnum = ? WHERE roomnumber = ?;";
+			String sql = "UPDATE room SET currentnum = ? WHERE roomname = ?;";
 			pstmt = conn.prepareStatement(sql);
 			pstmt.setInt(1, currentNum);
-			pstmt.setInt(2,roomnumber);
+			pstmt.setString(2,roomname);
 			pstmt.executeUpdate();
 			System.out.println("아이디" + rm.getRoomMember(roomnumber));
 		} catch (IOException e) {
@@ -293,16 +388,16 @@ public class ChatProtocol {
 		Connection conn = null;
 		ResultSet rs = null;
 		try {
-			int roomnumber = dis.readInt();
+			String roomname = dis.readUTF();
 			String id = dis.readUTF();
-			rm.removeRoom_member(roomnumber, id);
+			rm.removeRoom_member(roomname, id);
 			
-			int currentNum = rm.getRoomNum(roomnumber);
+			int currentNum = rm.getRoomNum(roomname);
 			conn = dao_room.getConn();
-			String sql = "UPDATE room SET currentnum = ? WHERE roomnumber = ?;";
+			String sql = "UPDATE room SET currentnum = ? WHERE roomname = ?;";
 			pstmt = conn.prepareStatement(sql);
 			pstmt.setInt(1, currentNum);
-			pstmt.setInt(2,roomnumber);
+			pstmt.setString(2,roomname);
 			pstmt.executeUpdate();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
