@@ -27,6 +27,7 @@ public class Command {
 	public static final int ENTERCHAT = 3001;
 	public static final int EXITROOM = 3002;
 	public static final int ROOMUPDATE = 3003;
+	public static final int PARTICIPANTSUPDATE = 3004;
 	
 	public static final int PROFILEVIEW = 4000;
 	

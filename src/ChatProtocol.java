@@ -86,9 +86,28 @@ public class ChatProtocol {
 			findroom();
 		} else if (fromClient == Command.MAKEROOM) {
 			makeroom();
+		} else if (fromClient == Command.PARTICIPANTSUPDATE) {
+			participantsupdate();
 		}
 		
 	}
+	
+	public void participantsupdate() {
+		try {
+			String roomname = dis.readUTF();
+			int roomnum = rm.getRoomNum(roomname);
+			dos.writeInt(roomnum);
+			for (int i = 0; i < roomnum; i++) {
+				String x = rm.getUserByIndex(roomname, i).getId();
+				dos.writeUTF(x);
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+	
 	
 	private void makeroom() {
 		Connection conn = null;

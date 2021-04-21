@@ -62,7 +62,7 @@ public class RoomManager {
 	public void removeRoom_member(String roomname, String id) {
 		for (int i = 0; i < room.get(roomname).size(); i++) {
 			if (room.get(roomname).get(i).getId().equals(id)) {
-				room.get(roomname).remove(i);
+				room.get(roomname).remove(id);
 			}
 		}
 	}
@@ -89,6 +89,10 @@ public class RoomManager {
 			}
 		}
 		return null;
+	}
+	
+	public User getUserByIndex (String roomname, int index) {
+		return room.get(roomname).get(index);
 	}
 }
 
