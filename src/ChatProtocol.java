@@ -111,6 +111,7 @@ public class ChatProtocol {
 			while (rs.next()) {
 				bookmark = rs.getString(1); //123768
 			}
+			//1 2 3
 			int roomnum = bookmark.length();
 			int [] room = new int [roomnum];
 			int x = Integer.parseInt(bookmark);
